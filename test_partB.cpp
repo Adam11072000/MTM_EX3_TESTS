@@ -1,13 +1,13 @@
-#include "../part2/base_event.h"
-#include "../part2/closed_event.h"
-#include "../part2/custom_event.h"
-#include "../part1/date_wrap.h"
-#include "../part2/event_container.h"
-#include "../part1/exceptions.h"
-#include "../part2/festival.h"
-#include "../part2/one_time_event.h"
-#include "../part2/open_event.h"
-#include "../part2/recurring_event.h"
+#include "../partB/base_event.h"
+#include "../partB/closed_event.h"
+#include "../partB/custom_event.h"
+#include "../partA/date_wrap.h"
+#include "../partB/event_container.h"
+#include "../partA/exceptions.h"
+#include "../partB/festival.h"
+#include "../partB/one_time_event.h"
+#include "../partB/open_event.h"
+#include "../partB/recurring_event.h"
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -191,7 +191,7 @@ bool testConstructorOpenEvent()
 bool testRegisterParticipantOpenEvent()
 {
     bool result = true;
-   OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testRegisterParticipantOpenEvent.txt")
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testRegisterParticipantOpenEvent.txt")
     try {
         OpenEvent event1(DateWrap(0, 1, 2000), "event1");
     }catch(mtm::InvalidDate&){
