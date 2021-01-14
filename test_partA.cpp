@@ -1,5 +1,5 @@
-#include "../part1/date_wrap.h"
-#include "../part1/exceptions.h"
+#include "../partA/date_wrap.h"
+#include "../partA/exceptions.h"
 #include <iostream>
 #include <fstream>
 using mtm::DateWrap;
@@ -7,7 +7,7 @@ using std::cout;
 using std::endl;
 using std::ifstream;
 using std::ofstream;
-using mtm::Exceptions;
+using mtm::Exception;
 
 #define ASSERT_TEST(expr)                                                         \
      do {                                                                          \
