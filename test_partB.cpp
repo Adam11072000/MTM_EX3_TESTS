@@ -18,12 +18,20 @@ using std::ifstream;
 using std::ofstream;
 using std::fstream;
 typedef mtm::EventContainer::EventIterator Iter;
+using mtm::OpenEvent;
+using mtm::ClosedEvent;
+using mtm::CustomEvent;
+using mtm::BaseEvent;
+using mtm::DateWrap;
+using mtm::Festival;
+using mtm::RecurringEvent;
+using mtm::OneTimeEvent;
 
-
-#define ASSERT_TEST(expr)                                                         \
+/**Prints which assertion failed and in which file*/
+#define ASSERT(expr)                                                         \
      do {                                                                          \
          if (!(expr)) {                                                            \
-             cout << "\nAssertion failed at"<< __FILE__<< __LINE__ << #expr << endl; \
+             cout << "\nAssertion failed at line"<< __LINE__ << "  " << __FILE__ << #expr << endl; \
              result = false;                                                       \
          }                                                                         \
      } while (0);
@@ -37,6 +45,15 @@ typedef mtm::EventContainer::EventIterator Iter;
             cout << "[Failed]\n\n <span>To see what the test does and why it failed, please check the link at the top of the page to the test file</span>" << endl;       \
         }                                \
     } while (0);
+
+
+
+
+#define OPEN_FILE(streamName, name) const char* fileName = name;\
+std::ofstream streamName(fileName, std::ofstream::trunc | std::ofstream::in);\
+if(!(streamName).is_open()){\
+throw FileFailed();\
+}
 
 
 class FileFailed{
@@ -79,21 +96,32 @@ void printEventsShort(mtm::EventContainer& events, ofstream& stream) {
         event.printShort(stream);
     }
 }
+void printEventsLong(mtm::EventContainer& events, ofstream& stream) {
+    for (Iter iter = events.begin(); iter != events.end(); ++iter) {
+        mtm::BaseEvent &event = *iter;
+        event.printLong(stream);
+    }
+}
 
 
+struct StudentFilter {
+    bool operator()(int student) {
+        return student == 1 || student == 3 || student == 20000;
+    }
+};
 
+struct Filer2{
+    bool operator()(int student){
+        return student>=5 && student<=8;
+    }
+};
 
 
 /**__________________________________________________________________________*/
 /** HERE START THE TESTS*/
 bool test1SegelProvided() {
     bool result = true;
-    const char* fileName = "../../provided/testOutputs/your_outputs/test1SegelProvided.txt";
-    std::ofstream out(fileName, std::ios_base::in);
-    out.open(fileName);
-    if(!out.is_open()){
-        throw FileFailed();
-    }
+    OPEN_FILE(out,"../../provided/testOutputs/partB/your_outputs/test1SegelProvided.txt")
     mtm::Festival festival(mtm::DateWrap(21, 10, 2020));
     festival.add(mtm::OpenEvent(mtm::DateWrap(21, 10, 2020), "Performance 1"));
     mtm::ClosedEvent closed(mtm::DateWrap(21, 10, 2020), "Performance 2");
@@ -110,7 +138,7 @@ bool test1SegelProvided() {
                                                "A long time ago");
     printEventsShort(one_time, out);
     out.close();
-    ASSERT_TEST(matchFiles(fileName, "../../provided/testOutputs/expected/test1SegelProvided.txt"))
+    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partB/expected/test1SegelProvided.txt"))
     return result;
 }
 
@@ -125,20 +153,10 @@ void test2SegelProvided_aux(mtm::BaseEvent& event, ofstream& stream) {
     delete clone;
 }
 
-struct StudentFilter {
-    bool operator()(int student) {
-        return student == 1 || student == 3 || student == 20000;
-    }
-};
 
 bool test2SegelProvided() {
     bool result = true;
-    const char* fileName = "../../provided/testOutputs/your_outputs/test2SegelProvided.txt";
-    std::ofstream out(fileName, std::ios_base::in);
-    out.open(fileName);
-    if(!out.is_open()){
-        throw FileFailed();
-    }
+    OPEN_FILE(out,"../../provided/testOutputs/partB/your_outputs/test2SegelProvided.txt")
     mtm::OpenEvent open(mtm::DateWrap(21, 10, 2020), "An Open Event");
     test2SegelProvided_aux(open, out);
 
@@ -151,16 +169,334 @@ bool test2SegelProvided() {
                                            "A Custom Event", StudentFilter());
     test2SegelProvided_aux(custom, out);
     out.close();
-    ASSERT_TEST(matchFiles(fileName,"../../provided/testOutputs/expected/test2SegelProvided.txt" ))
+    ASSERT(matchFiles(fileName,"../../provided/testOutputs/partB/expected/test2SegelProvided.txt" ))
     return result;
 }
 
-bool testConstructorOpenEvent
-const int NUMBER_OF_TESTS = 2;
+
+
+
+bool testConstructorOpenEvent()
+{
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testConstructorOpenEvent.txt")
+    OpenEvent event1(DateWrap(1,2,2000), "event1");
+    event1.printShort(out);
+    event1.printLong(out);
+    out.close();
+    ASSERT(matchFiles(fileName,"../../provided/testOutputs/partB/expected/testConstructorOpenEvent.txt"))
+    return result;
+}
+
+bool testRegisterParticipantOpenEvent()
+{
+    bool result = true;
+   OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testRegisterParticipantOpenEvent.txt")
+    try {
+        OpenEvent event1(DateWrap(0, 1, 2000), "event1");
+    }catch(mtm::InvalidDate&){
+        out << "InvalidDate" << endl;
+    }
+    OpenEvent event1(DateWrap(1, 1, 2000), "event1");
+    for(int i = 0 ; i < 10 ; i++){
+        try{
+            event1.registerParticipant(i);
+        }catch(mtm::InvalidStudent&){
+            out << "InvalidStudent" << endl;
+        }
+    }
+    try{
+        event1.registerParticipant(2);
+    }catch(mtm::AlreadyRegistered&){
+        out << "AlreadyRegistered" << endl;
+    }
+    event1.printLong(out);
+    out.close();
+    ASSERT(matchFiles(fileName,"../../provided/testOutputs/partB/expected/testRegisterParticipantOpenEvent.txt"))
+    return result;
+}
+
+
+// seraj func
+bool testUnregisterParticipantOpenEvent()
+{
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testUnRegisterParticipantOpenEvent1.txt")
+    OpenEvent event1(DateWrap(1, 1, 2000), "event1");
+    for(int i = 1; i <= 5; i++){
+        event1.registerParticipant(i*i);
+    }
+    event1.printLong(out);
+    out.close();
+    ASSERT(matchFiles(fileName,"../../provided/testOutputs/partB/expected/testUnRegisterParticipantOpenEvent1.txt"))
+    const char* fileName2 = "../../provided/testOutputs/partB/your_outputs/testUnRegisterParticipantOpenEvent2.txt";
+    std::ofstream out2(fileName2, std::ios_base::in | std::ofstream::trunc);
+    if(!out2.is_open()){
+        throw FileFailed();
+    }
+    for (int i = 0; i <=25; i++){
+        try{
+            event1.unregisterParticipant(i);
+        }catch(mtm::NotRegistered&){
+            out2 << "NotRegistered" << endl;
+        }catch(mtm::InvalidStudent&){
+            out2 << "InvalidStudent" << endl;
+        }
+    }
+    event1.printLong(out2);
+    out2.close();
+    ASSERT(matchFiles(fileName2,"../../provided/testOutputs/partB/expected/testUnRegisterParticipantOpenEvent2.txt"))
+    return result;
+}
+
+bool testCloneOpenEvent(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testCloneOpenEvent.txt")
+    OpenEvent event1(DateWrap(19,2,2021), "mtm exam");
+    event1.registerParticipant(3);
+    try {
+        event1.registerParticipant(3);
+    }catch(mtm::AlreadyRegistered&){
+        out << "AlreadyRegistered" << endl;
+    }
+    event1.registerParticipant(2);
+    event1.registerParticipant(4);
+    event1.registerParticipant(5);
+    OpenEvent* eventPtr = event1.clone();
+    ASSERT(typeid(*eventPtr).name() == typeid(event1).name());
+    eventPtr->printLong(out);
+    event1.printLong(out);
+    out.close();
+    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partB/expected/testCloneOpenEvent.txt"))
+    delete eventPtr;
+    return result;
+}
+
+bool testClosedEventConstructor()
+{
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testClosedEventConstructor.txt")
+    ClosedEvent event1(DateWrap(1,1,2000), "closed event");
+    try{
+        ClosedEvent event2(DateWrap(0,1,2000), "closed event");
+    }catch(mtm::InvalidDate&){
+        out << "InvalidDate" << endl;
+    }
+    event1.printLong(out);
+    event1.printShort(out);
+    out.close();
+    ASSERT(matchFiles(fileName,"../../provided/testOutputs/partB/expected/testClosedEventConstructor.txt" ))
+    return result;
+}
+
+bool testClosedEventRegisterAndUnRegister(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testClosedEventRegisterAndUnRegister.txt")
+    ClosedEvent event(DateWrap(1,1,2000), "AMEEEERCA");
+    for(int i=0; i<4; i++){
+        try{
+            event.addInvitee(i);
+        }catch(mtm::InvalidStudent&){
+            out << "InvalidStudent" << endl;
+        }
+    }
+    try{
+        event.addInvitee(2);
+    }catch(mtm::AlreadyInvited&){
+        out << "AlreadyInvited" << endl;
+    }
+    for(int i =1; i < 5; i++){
+        try{
+            event.registerParticipant(i);
+        }catch(mtm::RegistrationBlocked&){
+            out << "RegistrationBlocked"<< endl;
+        }
+    }
+    event.printLong(out);
+    out.close();
+    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partB/expected/testClosedEventRegisterAndUnRegister.txt"))
+    return result;
+}
+
+bool testClosedEventClone(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testClosedEventClone.txt")
+    ClosedEvent ev(DateWrap(1,1,2000), "ev");
+    for(int i=1; i<4; i++){
+        ev.addInvitee(i);
+        ev.registerParticipant(i);
+    }
+    ev.unregisterParticipant(3);
+    ev.registerParticipant(3);//to check when unregistering if uninviting too
+    ClosedEvent* evPtr = ev.clone();
+    evPtr->printLong(out);
+    ev.printLong(out);
+    out.close();
+    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partB/expected/testClosedEventClone.txt"))
+    delete evPtr;
+    return result;
+}
+
+bool testCustomEventConstructor(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testCustomEventConstructor.txt")
+    CustomEvent<Filer2> ev(DateWrap(1,1,2000), "ev", Filer2());
+    try{
+        CustomEvent<Filer2> ev2(DateWrap(1,0,2000), "ev", Filer2());
+    }catch(mtm::InvalidDate&){
+        out << "InvalidDate" << endl;
+    }
+    ev.printLong(out);
+    ev.printShort(out);
+    out.close();
+    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partB/expected/testCustomEventConstructor.txt"))
+    return result;
+}
+
+bool testCustomEventParticipants(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testCustomEventParticipants.txt")
+    CustomEvent<Filer2> ev1(DateWrap(1,1,2000), "ev1",Filer2());
+    for(int i=0; i<9; i++){
+        try{
+            ev1.registerParticipant(i);
+        }catch(mtm::InvalidStudent&){
+            out << "InvalidStudent" << endl;
+        }catch(mtm::RegistrationBlocked&){
+            out << "RegistrationBlocked" << endl;
+        }
+    }
+    try{
+        ev1.unregisterParticipant(3);
+    }catch(mtm::NotRegistered&){
+        out << "NotRegistered" << endl;
+    }
+    ev1.unregisterParticipant(5);
+    try{
+        ev1.unregisterParticipant(2);
+    }catch(mtm::NotRegistered&){
+        out << "NotRegistered" << endl;
+    }
+    ev1.printLong(out);
+    out.close();
+    ASSERT(matchFiles(fileName,"../../provided/testOutputs/partB/expected/testCustomEventParticipants.txt"))
+    return result;
+}
+
+bool testCustomEventClone(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testCustomEventClone.txt")
+    CustomEvent<Filer2> ev1(DateWrap(1,1,2000), "ev1", Filer2());
+    ev1.registerParticipant(6);
+    ev1.registerParticipant(7);
+    CustomEvent<Filer2>* ev2 = ev1.clone();
+    try{
+        ev2->registerParticipant(4);
+    }catch(mtm::RegistrationBlocked&){
+        out << "RegistrationBlocked" << endl;
+    }
+    try{
+        ev2->registerParticipant(6);
+    }catch(mtm::AlreadyRegistered&){
+        out << "AlreadyRegistered" << endl;
+    }
+    ev1.printLong(out);
+    ev2->printLong(out);
+    out.close();
+    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partB/expected/testCustomEventClone.txt"))
+    delete ev2;
+    return result;
+}
+
+bool testFestivalConstructor(){
+    bool result = true;
+    Festival festival(DateWrap(1,1,2000));
+    ASSERT(festival.begin() == festival.end())
+    return result;
+}
+
+bool testFestivalAddAndIterator(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testFestivalAddAndIterator.txt")
+    Festival festival(DateWrap(1,1,2000));
+    OpenEvent ev1(DateWrap(1,1,2000), "ev1");
+    OpenEvent ev2(DateWrap(2,1,2000), "ev2");
+    OpenEvent ev3(DateWrap(1,1,2000), "ev3");
+    ev1.registerParticipant(4);
+    ev1.registerParticipant(5);
+    ev3.registerParticipant(4);
+    ev3.registerParticipant(5);
+    festival.add(ev1);
+    festival.add(ev3);
+    try{
+        festival.add(ev2);
+    }catch(mtm::DateMismatch&){
+        out << "DateMismatch"<<endl;
+    }
+    printEventsLong(festival, out);
+    out.close();
+    Festival festival1(DateWrap(1,1,2000));
+    Iter iter(festival1.begin());
+    Iter iter2(festival.begin());
+    iter = iter2;
+    ASSERT(iter == iter2)
+    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partB/expected/testFestivalAddAndIterator.txt"))
+    return result;
+}
+
+bool testFestivalPolymorphism(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testFestivalPolymorphism.txt")
+    Festival festival(DateWrap(1,1,2000));
+    OpenEvent openEvent(DateWrap(1,1,2000), "an open event");
+    ClosedEvent closedEvent(DateWrap(1,1,2000), "a closed event");
+    CustomEvent<Filer2> customEvent(DateWrap(1,1,2000), "a custom event", Filer2());
+    festival.add(openEvent);
+    closedEvent.addInvitee(5);
+    closedEvent.addInvitee(6);
+    festival.add(closedEvent);
+    festival.add(customEvent);
+    for(int i=5; i<8; i++) {
+        for (Iter iter(festival.begin()); iter != festival.end(); ++iter) {
+            try {
+                (*iter).registerParticipant(i);
+            } catch (mtm::RegistrationBlocked &) {//throws an exception because of closed event
+                out << "RegistrationBlocked" << endl;
+            }
+        }
+    }
+    Iter iter(festival.begin());
+    ++iter;
+    try{
+        (*iter).registerParticipant(9);
+    }catch(mtm::RegistrationBlocked&){
+        out << "RegistrationBlocked" << endl;
+    }
+    printEventsLong(festival, out);
+    out.close();
+    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partB/expected/testFestivalPolymorphism.txt"))
+    return result;
+}
+
+const int NUMBER_OF_TESTS = 15;
+
 
 #define TEST_NAMES \
     X(test1SegelProvided) \
-    X(test2SegelProvided)
+    X(test2SegelProvided) \
+    X(testConstructorOpenEvent) \
+    X(testRegisterParticipantOpenEvent)\
+    X(testUnregisterParticipantOpenEvent) \
+    X(testCloneOpenEvent) \
+    X(testClosedEventConstructor)      \
+    X(testClosedEventRegisterAndUnRegister)\
+    X(testClosedEventClone)     \
+    X(testCustomEventConstructor)      \
+    X(testCustomEventParticipants)     \
+    X(testCustomEventClone)     \
+    X(testFestivalConstructor)  \
+    X(testFestivalAddAndIterator)      \
+    X(testFestivalPolymorphism)
 
 const char *testNames[] = {
 #define X(name) #name,
