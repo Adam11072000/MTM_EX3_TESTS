@@ -7,7 +7,7 @@ These are tests for the 3rd hw for MATAM!
 to be able to run the tests, i'll provide a few simple steps to ensure that the tests run smoothly on your computer.
 
 First, i'd like to talk about the directory hierarchy:
-in a named whatever you like (doesn't really matter), there should be 4 directoeries:
+in the main directory (doesn't really matter what name), there should be 4 directoeries:
 
 1) part1, which consists of date_wrap.c and date_wrap.h (if you linked the date library from hw1 then all good, if not then be sure to add date.c to your cmake in add_executable)
 
