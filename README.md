@@ -26,5 +26,7 @@ the test files i provided are named exactly as the test files of the segel, so b
 IMPORTANT!!!
 
 
-if the directory cmake_build_debug is in your main directory, (which consists of all the directories stated above), you need to change the test files:
-in OPEN_FILE and ASSERT macros in each test, you need to change the first ../ in each one.
+you need to configure the path in each test depending on where your cmake_build_debug directory is. (the path is tests are when the said directory is in part2)
+
+example:
+  if the said directory is in the main directory, you're going to need to change the path in each MACRO ( ASSERT and OPEN_FILE) depending on the path.
