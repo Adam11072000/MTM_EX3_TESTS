@@ -21,3 +21,8 @@ in a named whatever you like (doesn't really matter), there should be 4 directoe
                 III) 3 directories, for partA, partB and partC, each containing two directories, expected and your_outputs.
                 
 the test files i provided are named exactly as the test files of the segel, so be sure to overwrite them :)
+
+
+IMPORTANT!!!
+if the directory cmake_build_debug is in your main directory, (which consists of all the directories stated above), you need to change the test files:
+in OPEN_FILE and ASSERT macros in each test, you need to change the first ../ in each one.
