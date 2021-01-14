@@ -218,7 +218,7 @@ bool testRegisterParticipantOpenEvent()
 
 
 // seraj func
-bool testUnregisterParticipantOpenEvent()
+bool testUnregisterParticipantOpenEvent_CreatorSiraj()
 {
     bool result = true;
     OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testUnRegisterParticipantOpenEvent1.txt")
@@ -486,7 +486,7 @@ const int NUMBER_OF_TESTS = 15;
     X(test2SegelProvided) \
     X(testConstructorOpenEvent) \
     X(testRegisterParticipantOpenEvent)\
-    X(testUnregisterParticipantOpenEvent) \
+    X(testUnregisterParticipantOpenEvent_CreatorSiraj) \
     X(testCloneOpenEvent) \
     X(testClosedEventConstructor)      \
     X(testClosedEventRegisterAndUnRegister)\
