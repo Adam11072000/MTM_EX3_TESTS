@@ -18,6 +18,6 @@ in a named whatever you like (doesn't really matter), there should be 4 directoe
 4) provided: which has the following files:
                 I) the test files I provided in the repository.
                 II) the files the segel provided (such as date.h).
-                III) the two directories named output and expected output I provided in the repository.
+                III) 3 directories, for partA, partB and partC, each containing two directories, expected and your_outputs.
                 
 the test files i provided are named exactly as the test files of the segel, so be sure to overwrite them :)
