@@ -30,3 +30,7 @@ you need to configure the path in each test depending on where your cmake_build_
 
 example:
   if the said directory is in the main directory, you're going to need to change the path in each MACRO ( ASSERT and OPEN_FILE) depending on the path.
+  
+  
+  
+  Always check regulary for added tests :)
