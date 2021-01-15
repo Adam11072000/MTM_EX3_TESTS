@@ -30,7 +30,8 @@ you need to configure the path in each test depending on where your cmake_build_
 
 example:
   if the said directory is in the main directory, you're going to need to change the path in each MACRO ( ASSERT and OPEN_FILE) depending on the path.
+    
+  to run the test on the SSH (sharat) of the faculty, the file path in each macro should start without the ../../provided, instead it should start with ./provided.
+ you can change the path as you like but be sure to put the expected outputs in a correct directory depending on the path given.
   
-  
-  
-  Always check regulary for added tests :)
+ Always check regulary for added tests :)
