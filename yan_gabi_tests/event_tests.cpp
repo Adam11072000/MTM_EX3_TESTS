@@ -47,7 +47,7 @@ bool testOpenEventGeneral(){
     string name = "Hot event";
     DateWrap date(8,1,2021);
     OpenEvent event(date, name);
-    OpenEvent event2 = *static_cast<OpenEvent *>(event.clone());
+    OpenEvent event2 = *dynamic_cast<OpenEvent *>(event.clone());
 
     ASSERT_TEST(event.getDate() == date, returnLabel);
     ASSERT_TEST(event.getName() == name, returnLabel);
