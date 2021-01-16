@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <typeinfo>
 
 using std::cout;
 using std::endl;
