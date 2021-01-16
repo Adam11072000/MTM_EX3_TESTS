@@ -158,7 +158,7 @@ bool testClosedEventGeneral(){
     string name = "Cold event";
     DateWrap date(8,1,2021);
     ClosedEvent event(date, name);
-    ClosedEvent event2 = *static_cast<ClosedEvent *>(event.clone());
+    ClosedEvent event2 = *dynamic_cast<ClosedEvent *>(event.clone());
 
     ASSERT_TEST(event.getDate() == date, returnLabel);
     ASSERT_TEST(event.getName() == name, returnLabel);
@@ -268,7 +268,7 @@ bool testCustomEventGeneral(){
     string name = "Lukewarm event";
     DateWrap date(5,5,2021);
     CustomEvent<StudentFilter> event(date, name, StudentFilter());
-    CustomEvent<StudentFilter> event2 = *static_cast<CustomEvent<StudentFilter> *>(event.clone());
+    CustomEvent<StudentFilter> event2 = *dynamic_cast<CustomEvent<StudentFilter> *>(event.clone());
 
     ASSERT_TEST(event.getDate() == date, returnLabel);
     ASSERT_TEST(event.getName() == name, returnLabel);
