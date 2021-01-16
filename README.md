@@ -9,11 +9,11 @@ to be able to run the tests, i'll provide a few simple steps to ensure that the 
 First, i'd like to talk about the directory hierarchy:
 in the main directory (doesn't really matter what name), there should be 4 directoeries:
 
-1) part1, which consists of date_wrap.c and date_wrap.h (if you linked the date library from hw1 then all good, if not then be sure to add date.c to your cmake in add_executable)
+1) partA, which consists of date_wrap.c and date_wrap.h (if you linked the date library from hw1 then all good, if not then be sure to add date.c to your cmake in add_executable)
 
-2) part2: which consists of all the files you used to implement the said part.
+2) partB: which consists of all the files you used to implement the said part.
 
-3) part3: as said in part2 directory.
+3) partC: as said in part2 directory.
 
 4) provided: which has the following files:
                 I) the test files I provided in the repository.
