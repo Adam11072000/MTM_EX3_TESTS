@@ -76,7 +76,6 @@ bool testConstructor(){
     bool result = true;
     const char* fileName = "../../provided/testOutputs/partA/your_outputs/testConstructor.txt";
     std::ofstream out(fileName, std::ios_base::in | std::ios_nase::trunc);
-    out.open(fileName);
     if(!out.is_open()){
         throw FileFailed();
     }
@@ -139,7 +138,6 @@ bool testExceptions()
     bool result = true;
     const char* fileName = "../../provided/testOutputs/partA/your_outputs/testExceptions.txt";
     std::ofstream out(fileName, std::ios_base::in | std::ios_nase::trunc);
-    out.open(fileName);
     if(!out.is_open()){
         throw FileFailed();
     }
