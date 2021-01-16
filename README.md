@@ -35,3 +35,8 @@ example:
  you can change the path as you like but be sure to put the expected outputs in a correct directory depending on the path given.
   
  Always check regulary for added tests :)
+ 
+ 
+ 
+ IMPORTANT NOTE!!!:
+ yan's tests are code-specific, treat it with a grain of salt XD
