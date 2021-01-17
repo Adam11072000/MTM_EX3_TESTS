@@ -1,12 +1,5 @@
 # MTM_EX3_TESTS
 
-
-
- IMPORTANT NOTE!!!:
- yan's tests are code-specific, and have a few bugs that need fixing, treat it with a grain of salt!!!!!
- if u can fix them do a pull request, if not then i'll try to do it during the week
-
-
 HELLO DEAR STUDENTS!!!
 
 These are tests for the 3rd hw for MATAM!
