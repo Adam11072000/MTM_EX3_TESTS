@@ -13,6 +13,8 @@
 #include <fstream>
 #include <typeinfo>
 
+
+using std::string;
 using std::cout;
 using std::endl;
 using std::ifstream;
@@ -29,7 +31,7 @@ using mtm::RecurringEvent;
 using mtm::OneTimeEvent;
 
 /**Prints which assertion failed and in which file*/
-#define ASSERT(expr)                                                         \
+#define ASSERT_TEST(expr)                                                         \
      do {                                                                          \
          if (!(expr)) {                                                            \
              cout << "\nAssertion failed at line"<< __LINE__ << "  " << __FILE__ << #expr << endl; \
@@ -49,7 +51,7 @@ using mtm::OneTimeEvent;
 
 
 
-
+#define ASSERT(expr) ASSERT_TEST(expr)
 
 
 #define OPEN_FILE(streamName, name) const char* fileName = name;\
@@ -103,7 +105,7 @@ void printEventsLong(mtm::EventContainer& events, ofstream& stream) {
 
 struct StudentFilter {
     bool operator()(int student) {
-        return student == 1 || student == 3 || student == 20000;
+        return student == 1 || student == 3 || student == 20000 || student == 60 || student == 150000;
     }
 };
 
@@ -628,9 +630,288 @@ bool testBigEventContainersAndPolymorphism(){
     return result;
 }
 
+bool testEventCreateDestroy_CreatorYan() {
+    bool result = true;
+    string name = "Hot event";
+    OpenEvent event(DateWrap(1,1,2000), name);
+    ClosedEvent event2(DateWrap(1,1,2000), name);
+    CustomEvent<StudentFilter> event3(DateWrap(1,1,2000), name, StudentFilter());
+    return result;
+}
 
+bool testOpenEventRegister_CreatorYan(){
+    bool result = true;
+    bool passed = true;
+    string name = "Hot event";
+    DateWrap date(8,1,2021);
+    OpenEvent event(date, name);
+    event.registerParticipant(6);
+    event.registerParticipant(18);
+    try{
+        passed = false;
+        event.registerParticipant(6);
+    } catch(mtm::AlreadyRegistered& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    try{
+        passed = false;
+        event.registerParticipant(18);
+    } catch(mtm::AlreadyRegistered& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    try{
+        passed = false;
+        event.registerParticipant(-1);
+    } catch(mtm::InvalidStudent& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    try{
+        passed = false;
+        event.registerParticipant(1234567891);
+    } catch(mtm::InvalidStudent& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    return result;
+}
 
-const int NUMBER_OF_TESTS = 20;
+bool testOpenEventUnregister_CreatorYan(){
+    bool result = true;
+    bool passed = true;
+    string name = "Hot event";
+    DateWrap date(8,1,2021);
+    OpenEvent event(date, name);
+    event.registerParticipant(6);
+    event.registerParticipant(18);
+    event.unregisterParticipant(6);
+    ASSERT_TEST(passed)
+    try{
+        passed = false;
+        event.registerParticipant(18);
+    } catch(mtm::AlreadyRegistered& e){
+        passed = true;
+    }
+    try{
+        passed = false;
+        event.unregisterParticipant(6);
+    } catch(mtm::NotRegistered& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    try{
+        passed = false;
+        event.unregisterParticipant(-1);
+    } catch(mtm::InvalidStudent& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    try{
+        passed = false;
+        event.unregisterParticipant(1234567891);
+    } catch(mtm::InvalidStudent& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    return result;
+}
+
+bool testClosedEventRegister_CreatorYan(){
+    bool result = true;
+    bool passed = true; // To check exceptions
+    string name = "Cold event";
+    DateWrap date(8,1,2021);
+    ClosedEvent event(date, name);
+
+    for(int i = 1; i < 10; i++){
+        event.addInvitee(i);
+    }
+
+    for(int i = 1; i < 10; i++){
+        try{
+            passed = false;
+            event.addInvitee(i);
+        } catch(mtm::AlreadyInvited& e){
+            passed = true;
+        }
+        ASSERT_TEST(passed)
+    }
+
+    try{
+        passed = false;
+        event.addInvitee(-20);
+    } catch(mtm::InvalidStudent&){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+
+    try{
+        passed = false;
+        event.addInvitee(1234567891);
+    } catch(mtm::InvalidStudent&){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+
+    // Participants tests
+    for(int i = 1; i < 10; i++){
+        event.registerParticipant(i);
+    }
+
+    for(int i = 1; i < 10; i++){
+        try{
+            passed = false;
+            event.registerParticipant(i);
+        } catch(mtm::AlreadyRegistered& e){
+            passed = true;
+        }
+        ASSERT_TEST(passed)
+    }
+    try{
+        event.registerParticipant(200);
+        passed = false;
+    } catch(mtm::RegistrationBlocked& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+
+    try{
+        event.registerParticipant(1234567891);
+        passed = false;
+    } catch(mtm::InvalidStudent& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+
+    try{
+        event.registerParticipant(-20);
+        passed = false;
+    } catch(mtm::InvalidStudent& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    return result;
+}
+
+bool testCustomEventRegister_CreatorYan(){
+    bool result = true;
+    bool passed = true;
+    string name = "Lukewarm event";
+    DateWrap date(5,5,2021);
+    CustomEvent<StudentFilter> event(date, name, StudentFilter());
+
+    event.registerParticipant(1);
+    event.registerParticipant(3);
+    event.registerParticipant(20000);
+
+    try{
+        passed = false;
+        event.registerParticipant(1);
+    } catch(mtm::AlreadyRegistered& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    try{
+        event.registerParticipant(3);
+        passed = false;
+    } catch(mtm::AlreadyRegistered& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    try{
+        passed = false;
+        event.registerParticipant(20000);
+    } catch(mtm::AlreadyRegistered& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    try{
+        passed = false;
+        event.registerParticipant(55);
+    } catch(mtm::RegistrationBlocked& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    try{
+        passed = false;
+        event.registerParticipant(1);
+    } catch(mtm::AlreadyRegistered& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+
+    try{
+        passed = false;
+        event.registerParticipant(1234567891);
+    } catch(mtm::InvalidStudent& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+
+    try{
+        passed = false;
+        event.registerParticipant(-20);
+    } catch(mtm::InvalidStudent& e){
+        passed = true;
+    }
+    ASSERT_TEST(passed)
+    return result;
+}
+
+bool testOpenEventPrints_CreatorYan(){
+    bool result = true;
+    string name = "Hot event";
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testOpenEventPrints_CreatorYan.txt")
+    DateWrap date(8,1,2021);
+    OpenEvent event(date, name);
+    event.registerParticipant(6);
+    event.registerParticipant(18);
+    event.printShort(out);
+    event.printLong(out);
+    out.close();
+    ASSERT_TEST(matchFiles(fileName, "../../provided/testOutputs/partB/expected/testOpenEventPrints_CreatorYan.txt"))
+    return result;
+}
+
+bool testClosedEventPrints_CreatorYan(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testClosedEventPrints_CreatorYan.txt")
+    string name = "Mediocore event";
+    DateWrap date(8,1,2021);
+    ClosedEvent event(date, name);
+    for(int i = 100; i > 0; i--){
+        event.addInvitee(i*i);
+        event.registerParticipant(i*i);
+    }
+    event.printShort(out);
+    event.printLong(out);
+    out.close();
+    ASSERT_TEST(matchFiles(fileName, "../../provided/testOutputs/partB/expected/testClosedEventPrints_CreatorYan.txt"))
+    return result;
+}
+
+bool testCustomEventPrints_CreatorYan(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partB/your_outputs/testCustomEventPrints_CreatorYan.txt")
+    string name = "Very interesting event";
+    DateWrap date(8,1,2021);
+
+    CustomEvent<StudentFilter> event(date, name, StudentFilter());
+    event.registerParticipant(20000);
+    event.registerParticipant(1);
+    event.registerParticipant(3);
+    event.registerParticipant(60);
+    event.registerParticipant(150000);
+    event.printShort(out);
+    event.printLong(out);
+    out.close();
+    ASSERT_TEST(matchFiles(fileName,"../../provided/testOutputs/partB/expected/testCustomEventPrints_CreatorYan.txt" ))
+    return result;
+}
+
+const int NUMBER_OF_TESTS = 28;
 
 
 #define TEST_NAMES \
@@ -653,10 +934,15 @@ const int NUMBER_OF_TESTS = 20;
     X(testRecurringEventAdd)    \
     X(testOneTimeEventConstructor)  \
     X(testOneTimeEventAdd)\
-    X(testBigEventContainersAndPolymorphism)
-
-
-
+    X(testBigEventContainersAndPolymorphism)           \
+    X(testEventCreateDestroy_CreatorYan)               \
+    X(testOpenEventRegister_CreatorYan)\
+    X(testOpenEventUnregister_CreatorYan)              \
+    X(testClosedEventRegister_CreatorYan)              \
+    X(testCustomEventRegister_CreatorYan)               \
+    X(testOpenEventPrints_CreatorYan)               \
+    X(testClosedEventPrints_CreatorYan)               \
+    X(testCustomEventPrints_CreatorYan)
 
 const char *testNames[] = {
 #define X(name) #name,
