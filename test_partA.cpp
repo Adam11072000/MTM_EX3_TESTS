@@ -2,12 +2,14 @@
 #include "../partA/exceptions.h"
 #include <iostream>
 #include <fstream>
+
+
 using mtm::DateWrap;
 using std::cout;
 using std::endl;
 using std::ifstream;
 using std::ofstream;
-using mtm::Exception;
+using mtm::Exceptions;
 
 #define ASSERT_TEST(expr)                                                         \
      do {                                                                          \
@@ -27,21 +29,10 @@ using mtm::Exception;
         }                                \
     } while (0);
 
-
-template <class T> void print(const T& x, ofstream& stream) { stream << x << endl; }
-
-#define ASSERT(expr) ASSERT_TEST(expr)
-
 class FileFailed{
-public:
-    FileFailed() = default;
-    ~FileFailed() = default;
-};
-
-class FileOutputWrong{
-public:
-    FileOutputWrong() = default;
-    ~FileOutputWrong() = default;
+        public:
+        FileFailed() = default;
+        ~FileFailed() = default;
 };
 
 
@@ -66,7 +57,15 @@ bool matchFiles(const char* out,const char*  exp){
     return true;
 }
 
+#define OPEN_FILE(streamName, name) const char* fileName = name;\
+std::ofstream streamName(fileName, std::ofstream::trunc | std::ofstream::in);\
+if(!(streamName).is_open()){\
+throw FileFailed();\
+}
 
+template <class T> void print(const T& x, ofstream& stream) { stream << x << endl; }
+
+#define ASSERT(expr) ASSERT_TEST(expr)
 
 
 /**________________________________________________*/
@@ -74,11 +73,7 @@ bool matchFiles(const char* out,const char*  exp){
 
 bool testConstructor(){
     bool result = true;
-    const char* fileName = "../../provided/testOutputs/partA/your_outputs/testConstructor.txt";
-    std::ofstream out(fileName, std::ios_base::in | std::ios_base::trunc);
-    if(!out.is_open()){
-        throw FileFailed();
-    }
+    OPEN_FILE(out, "../../provided/testOutputs/partA/your_outputs/testConstructor.txt")
     DateWrap d1(1,1,2000);
     DateWrap d2(2,1,2000);
     DateWrap d3(3,1,2000);
@@ -136,11 +131,8 @@ bool testArithmeticOperators(){
 bool testExceptions()
 {
     bool result = true;
-    const char* fileName = "../../provided/testOutputs/partA/your_outputs/testExceptions.txt";
-    std::ofstream out(fileName, std::ios_base::in | std::ios_base::trunc);
-    if(!out.is_open()){
-        throw FileFailed();
-    }
+    OPEN_FILE(out, "../../provided/testOutputs/partA/your_outputs/testExceptions.txt")
+
     DateWrap d1(1,1,2000);
     DateWrap d2(2,1,2000);
     DateWrap d3(3,1,2000);
@@ -159,14 +151,148 @@ bool testExceptions()
     ASSERT(matchFiles(fileName, "../../provided/testOutputs/partA/expected/testExceptions.txt"))
     return result;
 }
-const int NUMBER_OF_TESTS = 4;
+
+
+
+bool testDateWrapCreateDestroy_CreaterYan() {
+    bool result = true;
+    int day = 11, day2 = 25 , month = 1, month2 = 8, year = 2021, year2 = 1990;
+    DateWrap date(day,month, year);
+    DateWrap date2(date);
+    DateWrap date3(day2, month2, year2);
+
+    ASSERT(date.day() == day)
+    ASSERT(date.month() == month)
+    ASSERT(date.year() == year)
+
+    ASSERT(date2.day() == day)
+    ASSERT(date2.month() == month)
+    ASSERT(date2.year() == year)
+
+    date2 = date3;
+    ASSERT(date2.day() == day2)
+    ASSERT(date2.month() == month2)
+    ASSERT(date2.year() == year2)
+    DateWrap date4(1,1, 20);
+    DateWrap date5(1,1, 20);
+    ASSERT(date5++ == date4)
+    return result;
+}
+
+bool testLegalDate_CreatorYan(){
+    bool result = true, passed = true;
+    try{
+        passed = false;
+        DateWrap date(-3, 12, 4000);
+    } catch(mtm::InvalidDate& e){
+        passed = true;
+    }
+    ASSERT(passed);
+    try{
+        passed = false;
+        DateWrap date(40, 12, 4000);
+    } catch(mtm::InvalidDate& e){
+        passed = true;
+    }
+    ASSERT(passed);
+    try{
+        passed = false;
+        DateWrap date(1, -8, 4000);
+    } catch(mtm::InvalidDate& e){
+        passed = true;
+    }
+    ASSERT(passed);
+    try{
+        passed = false;
+        DateWrap date(1, 15, 4000);
+    } catch(mtm::InvalidDate& e){
+        passed = true;
+    }
+    ASSERT(passed);
+    return result;
+}
+
+bool testDateComparison_CreatorYan(){
+    bool result = true;
+    DateWrap date1(20,12,2020);
+    DateWrap date2(30,2,2021);
+
+    ASSERT(date1 == date1)
+    ASSERT(date1 != date2)
+
+    ASSERT(date1 < date2)
+    ASSERT(date1 <= date2)
+    ASSERT(date2 > date1)
+    ASSERT(date2 >= date1)
+
+    ASSERT(!(date1 == date2))
+    ASSERT(!(date1 == date2))
+
+    ASSERT(!(date1 >= date2))
+    ASSERT(!(date1 > date2))
+    ASSERT(!(date2 <= date1))
+    ASSERT(!(date2 < date1))
+    return result;
+}
+
+bool testDateIncrement_CreatorYan(){
+    bool result = true, passed = true;
+    int day = 30, month = 12, year = 2010;
+    DateWrap date(day, month, year);
+
+    date++;
+    ASSERT(date.day() == 1)
+    ASSERT(date.month() == 1)
+    ASSERT(date.year() == 2011)
+
+    try{
+        passed = false;
+        date += -3;
+    } catch(mtm::NegativeDays& e){
+        passed = true;
+    }
+    ASSERT(passed)
+
+    date += 3;
+
+    ASSERT(date.day() == 4)
+    ASSERT(date.month() == 1)
+    ASSERT(date.year() == 2011)
+
+    DateWrap date2 = date + 10;
+    ASSERT(date2.day() == 14)
+    ASSERT(date2.month() == 1)
+    ASSERT(date2.year() == 2011)
+
+    date2 = 30 + date;
+    ASSERT(date2.day() == 4)
+    ASSERT(date2.month() == 2)
+    ASSERT(date2.year() == 2011)
+    return result;
+}
+
+
+bool testDatePrint_CreatorYan(){
+    bool result = true;
+    OPEN_FILE(out, "../../provided/testOutputs/partA/your_outputs/testDatePrint_CreatorYan.txt")
+    DateWrap date(4,11,2011);
+    out << date;
+    out.close();
+    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partA/expected/testDatePrint_CreatorYan.txt"))
+    return result;
+}
+const int NUMBER_OF_TESTS = 9;
 
 #define TEST_NAMES \
     X(testConstructor) \
     X(testBooleanOperators) \
     X(testArithmeticOperators) \
-    X(testExceptions)
-
+    X(testExceptions)  \
+    X(testDateWrapCreateDestroy_CreaterYan) \
+    X(testLegalDate_CreatorYan)\
+    X(testDateComparison_CreatorYan)        \
+    X(testDateIncrement_CreatorYan)               \
+    X(testDatePrint_CreatorYan)
 
 
 
