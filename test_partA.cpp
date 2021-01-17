@@ -11,6 +11,8 @@ using std::ifstream;
 using std::ofstream;
 using mtm::Exceptions;
 
+const std::string FILE_PATH = "../../provided/testOutputs/partA";
+
 #define ASSERT_TEST(expr)                                                         \
      do {                                                                          \
          if (!(expr)) {                                                            \
@@ -29,35 +31,35 @@ using mtm::Exceptions;
         }                                \
     } while (0);
 
-class FileFailed{
-        public:
-        FileFailed() = default;
-        ~FileFailed() = default;
+class FileFailed {
+public:
+    FileFailed() = default;
+    ~FileFailed() = default;
 };
 
 
-bool matchFiles(const char* out,const char*  exp){
+bool matchFiles(std::string out, std::string  exp) {
     ifstream output(out);
-    if(!output){
+    if (!output) {
         cout << "can't open file" << endl;
     }
     ifstream expOutput(exp);
-    if(!expOutput){
+    if (!expOutput) {
         cout << "can't open file" << endl;
     }
-    while(!output.eof()){
+    while (!output.eof()) {
         char c;
         output >> c;
         char ex;
         expOutput >> ex;
-        if(ex != c) {
+        if (ex != c) {
             return false;
         }
     }
     return true;
 }
 
-#define OPEN_FILE(streamName, name) const char* fileName = name;\
+#define OPEN_FILE(streamName, name) std::string fileName = name;\
 std::ofstream streamName(fileName, std::ofstream::trunc | std::ofstream::in);\
 if(!(streamName).is_open()){\
 throw FileFailed();\
@@ -71,38 +73,40 @@ template <class T> void print(const T& x, ofstream& stream) { stream << x << end
 /**________________________________________________*/
 /** HERE START THE TESTS*/
 
-bool testConstructor(){
+bool testConstructor() {
     bool result = true;
-    OPEN_FILE(out, "../../provided/testOutputs/partA/your_outputs/testConstructor.txt")
-    DateWrap d1(1,1,2000);
-    DateWrap d2(2,1,2000);
-    DateWrap d3(3,1,2000);
+    OPEN_FILE(out, FILE_PATH + std::string("/your_outputs/testConstructor.txt"))
+    DateWrap d1(1, 1, 2000);
+    DateWrap d2(2, 1, 2000);
+    DateWrap d3(3, 1, 2000);
     print(d1, out);
     print(d2, out);
     print(d3, out);
-    try{
+    try {
         DateWrap d4(0, 1, 2000);
-    }catch(mtm::InvalidDate&){
+    }
+    catch (mtm::InvalidDate&) {
         out << "InvalidDate" << endl;
     }
-    try{
+    try {
         DateWrap d4(1, 0, 2000);
-    }catch(mtm::InvalidDate&){
+    }
+    catch (mtm::InvalidDate&) {
         out << "InvalidDate" << endl;
     }
     DateWrap d4(1, 1, 1);
     print(d4, out);
     out.close();
-    ASSERT(matchFiles(fileName,"../../provided/testOutputs/partA/expected/testConstructor.txt"))
+    ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testConstructor.txt")))
     return result;
 }
 
 bool testBooleanOperators()
 {
     bool result = true;
-    DateWrap d1(1,1,2000);
-    DateWrap d2(1,1,2000);
-    DateWrap d3(2,1,2000);
+    DateWrap d1(1, 1, 2000);
+    DateWrap d2(1, 1, 2000);
+    DateWrap d3(2, 1, 2000);
     ASSERT(d3 > d1)
     ASSERT(d1 >= d2)
     ASSERT(d1 <= d2)
@@ -112,15 +116,15 @@ bool testBooleanOperators()
     return result;
 }
 
-bool testArithmeticOperators(){
+bool testArithmeticOperators() {
     bool result = true;
-    DateWrap d1(1,1,2000);
-    DateWrap d2(1,1,2000);
-    DateWrap d3(2,1,2000);
-    d1+=1;
+    DateWrap d1(1, 1, 2000);
+    DateWrap d2(1, 1, 2000);
+    DateWrap d3(2, 1, 2000);
+    d1 += 1;
     ASSERT(d1 == d3)
-    DateWrap d4(30,2,3);
-    d4+=1;
+    DateWrap d4(30, 2, 3);
+    d4 += 1;
     ASSERT(d4.day() == 1)
     d1++;
     ASSERT(d4.month() == 3)
@@ -131,33 +135,33 @@ bool testArithmeticOperators(){
 bool testExceptions()
 {
     bool result = true;
-    OPEN_FILE(out, "../../provided/testOutputs/partA/your_outputs/testExceptions.txt")
+    OPEN_FILE(out, FILE_PATH + std::string("/your_outputs/testExceptions.txt"))
 
-    DateWrap d1(1,1,2000);
-    DateWrap d2(2,1,2000);
-    DateWrap d3(3,1,2000);
-    try{
+    DateWrap d1(1, 1, 2000);
+    DateWrap d2(2, 1, 2000);
+    DateWrap d3(3, 1, 2000);
+    try {
         d1 += -1;
-    }catch(mtm::NegativeDays&){
+    }
+    catch (mtm::NegativeDays&) {
         out << "NegativeDays" << endl;
     }
-    try{
+    try {
         d2 = d1 + (-1);
         print(d2, out);
-    }catch(mtm::NegativeDays&){
+    }
+    catch (mtm::NegativeDays&) {
         out << "NegativeDays" << endl;
     }
     out.close();
-    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partA/expected/testExceptions.txt"))
+    ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testExceptions.txt")))
     return result;
 }
 
-
-
 bool testDateWrapCreateDestroy_CreaterYan() {
     bool result = true;
-    int day = 11, day2 = 25 , month = 1, month2 = 8, year = 2021, year2 = 1990;
-    DateWrap date(day,month, year);
+    int day = 11, day2 = 25, month = 1, month2 = 8, year = 2021, year2 = 1990;
+    DateWrap date(day, month, year);
     DateWrap date2(date);
     DateWrap date3(day2, month2, year2);
 
@@ -173,49 +177,53 @@ bool testDateWrapCreateDestroy_CreaterYan() {
     ASSERT(date2.day() == day2)
     ASSERT(date2.month() == month2)
     ASSERT(date2.year() == year2)
-    DateWrap date4(1,1, 20);
-    DateWrap date5(1,1, 20);
+    DateWrap date4(1, 1, 20);
+    DateWrap date5(1, 1, 20);
     ASSERT(date5++ == date4)
     return result;
 }
 
-bool testLegalDate_CreatorYan(){
+bool testLegalDate_CreatorYan() {
     bool result = true, passed = true;
-    try{
+    try {
         passed = false;
         DateWrap date(-3, 12, 4000);
-    } catch(mtm::InvalidDate& e){
+    }
+    catch (mtm::InvalidDate& e) {
         passed = true;
     }
     ASSERT(passed);
-    try{
+    try {
         passed = false;
         DateWrap date(40, 12, 4000);
-    } catch(mtm::InvalidDate& e){
+    }
+    catch (mtm::InvalidDate& e) {
         passed = true;
     }
     ASSERT(passed);
-    try{
+    try {
         passed = false;
         DateWrap date(1, -8, 4000);
-    } catch(mtm::InvalidDate& e){
+    }
+    catch (mtm::InvalidDate& e) {
         passed = true;
     }
     ASSERT(passed);
-    try{
+    try {
         passed = false;
         DateWrap date(1, 15, 4000);
-    } catch(mtm::InvalidDate& e){
+    }
+    catch (mtm::InvalidDate& e) {
         passed = true;
     }
     ASSERT(passed);
     return result;
 }
 
-bool testDateComparison_CreatorYan(){
+bool testDateComparison_CreatorYan() {
     bool result = true;
-    DateWrap date1(20,12,2020);
-    DateWrap date2(30,2,2021);
+    DateWrap date1(20, 12, 2020);
+    DateWrap date2(30, 2, 2021);
 
     ASSERT(date1 == date1)
     ASSERT(date1 != date2)
@@ -235,7 +243,7 @@ bool testDateComparison_CreatorYan(){
     return result;
 }
 
-bool testDateIncrement_CreatorYan(){
+bool testDateIncrement_CreatorYan() {
     bool result = true, passed = true;
     int day = 30, month = 12, year = 2010;
     DateWrap date(day, month, year);
@@ -245,10 +253,11 @@ bool testDateIncrement_CreatorYan(){
     ASSERT(date.month() == 1)
     ASSERT(date.year() == 2011)
 
-    try{
+    try {
         passed = false;
         date += -3;
-    } catch(mtm::NegativeDays& e){
+    }
+    catch (mtm::NegativeDays& e) {
         passed = true;
     }
     ASSERT(passed)
@@ -272,13 +281,13 @@ bool testDateIncrement_CreatorYan(){
 }
 
 
-bool testDatePrint_CreatorYan(){
+bool testDatePrint_CreatorYan() {
     bool result = true;
-    OPEN_FILE(out, "../../provided/testOutputs/partA/your_outputs/testDatePrint_CreatorYan.txt")
-    DateWrap date(4,11,2011);
+    OPEN_FILE(out, FILE_PATH + std::string("/your_outputs/testDatePrint_CreatorYan.txt"))
+    DateWrap date(4, 11, 2011);
     out << date;
     out.close();
-    ASSERT(matchFiles(fileName, "../../provided/testOutputs/partA/expected/testDatePrint_CreatorYan.txt"))
+    ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testDatePrint_CreatorYan.txt")))
     return result;
 }
 const int NUMBER_OF_TESTS = 9;
@@ -296,7 +305,7 @@ const int NUMBER_OF_TESTS = 9;
 
 
 
-const char *testNames[] = {
+const char* testNames[] = {
 #define X(name) #name,
         TEST_NAMES
 #undef X
@@ -310,12 +319,14 @@ bool (*tests[])(void) = {
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        for(int i = 0; i < NUMBER_OF_TESTS ; i++){
+        for (int i = 0; i < NUMBER_OF_TESTS; i++) {
             RUN_TEST(tests[i], testNames[i])
         }
-    } else if (argc > 2) {
+    }
+    else if (argc > 2) {
         std::cout << "invalid arguments" << std::endl;
-    } else {
+    }
+    else {
         int i = std::atoi(argv[1]);
         tests[i - 1]();
     }
