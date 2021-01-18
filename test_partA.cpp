@@ -9,7 +9,7 @@ using std::cout;
 using std::endl;
 using std::ifstream;
 using std::ofstream;
-using mtm::Exceptions;
+using mtm::Exception;
 
 const std::string FILE_PATH = "../../provided/testOutputs/partA";
 
