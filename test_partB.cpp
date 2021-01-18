@@ -1,3 +1,4 @@
+
 #include "../partB/base_event.h"
 #include "../partB/closed_event.h"
 #include "../partB/custom_event.h"
@@ -134,7 +135,7 @@ BaseEvent* generate(int i) {
 class CustomEventWrap :public CustomEvent<Filter2> {
 public:
     CustomEventWrap(const DateWrap& date, const std::string& name)
-        :CustomEvent<Filter2>(date, name, Filter2()) {}
+            :CustomEvent<Filter2>(date, name, Filter2()) {}
     ~CustomEventWrap() override = default;
 };
 
@@ -253,7 +254,7 @@ bool testUnregisterParticipantOpenEvent_CreatorSiraj()
     event1.printLong(out);
     out.close();
     ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testUnRegisterParticipantOpenEvent1.txt")))
-    std::string fileName2 = FILE_PATH + std::string("/your_outputs/testUnRegisterParticipantOpenEvent2.txt";
+    std::string fileName2 = FILE_PATH + std::string("/your_outputs/testUnRegisterParticipantOpenEvent2.txt");
     std::ofstream out2(fileName2, std::ios_base::in | std::ofstream::trunc);
     if (!out2.is_open()) {
         throw FileFailed();
@@ -1024,3 +1025,4 @@ int main(int argc, char* argv[]) {
     }
     return 0;
 }
+
