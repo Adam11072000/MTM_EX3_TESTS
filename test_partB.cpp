@@ -253,7 +253,7 @@ bool testUnregisterParticipantOpenEvent_CreatorSiraj()
     event1.printLong(out);
     out.close();
     ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testUnRegisterParticipantOpenEvent1.txt")))
-    std::string fileName2 = FILE_PATH + std::string("/your_outputs/testUnRegisterParticipantOpenEvent2.txt";
+    std::string fileName2 = FILE_PATH + std::string("/your_outputs/testUnRegisterParticipantOpenEvent2.txt");
     std::ofstream out2(fileName2, std::ios_base::in | std::ofstream::trunc);
     if (!out2.is_open()) {
         throw FileFailed();
