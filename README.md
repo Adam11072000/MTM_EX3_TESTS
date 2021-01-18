@@ -16,12 +16,12 @@ in the main directory (doesn't really matter what name), there should be 4 direc
 
 4) provided: which has the following files:
 
-                I) the test files I provided in the repository.
+       I) the test files I provided in the repository.
                 
-                II) the files the segel provided (such as date.h).
+       II) the files the segel provided (such as date.h).
                 
-                III) 3 directories, for partA, partB and partC, each containing two directories, expected and your_outputs.
-   Alternatively, change the FILE_PATH variable at the top of the file to the path of the test outputs (currently only works in partA).
+       III) 3 directories, for partA, partB and partC, each containing two directories, expected and your_outputs.
+   Alternatively, change the FILE_PATH variable at the top of the file to the path of the test outputs.
 
 the test files i provided are named exactly as the test files of the segel, so be sure to overwrite them :)
 
