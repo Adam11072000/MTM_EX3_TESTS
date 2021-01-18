@@ -31,7 +31,7 @@ using mtm::Festival;
 using mtm::RecurringEvent;
 using mtm::OneTimeEvent;
 
-const std::string FILE_PATH = "../../provided/testOutputs/partB";
+static const std::string FILE_PATH = "../../provided/testOutputs/partB";
 
 /**Prints which assertion failed and in which file*/
 #define ASSERT_TEST(expr)                                                         \
@@ -965,6 +965,12 @@ bool testCustomEventPrints_CreatorYan() {
     return result;
 }
 
+
+bool testHugeEventContainers(){
+    bool result  = true;
+
+    return result;
+}
 const int NUMBER_OF_TESTS = 28;
 
 
