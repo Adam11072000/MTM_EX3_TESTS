@@ -11,14 +11,117 @@
 #include "../partC/schedule.h"
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 
-void test1(const mtm::Schedule& schedule) { schedule.printAllEvents(); }
 
-void test2(const mtm::Schedule& schedule) {
+using mtm::Schedule;
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::ofstream;
+using mtm::Festival;
+using mtm::RecurringEvent;
+using mtm::OneTimeEvent;
+using mtm::DateWrap;
+using mtm::BaseEvent;
+using mtm::OpenEvent;
+using mtm::ClosedEvent;
+using mtm::CustomEvent;
+
+static const std::string FILE_PATH = "../../provided/testOutputs/partC";
+
+#define ASSERT_TEST(expr, backUpbuf)                                                         \
+     do {                                                                                    \
+     cout.rdbuf(backUpbuf);\
+         if (!(expr)) {                                                                       \
+             cout << "\nAssertion failed at line"<< __LINE__ << "  " << __FILE__ << #expr << endl; \
+             result = false;                                                       \
+         }                                                                         \
+     } while (0);
+
+
+#define RUN_TEST(test, name)                  \
+    do {                                 \
+        cout << "+ Running" << (name) << "...";  \
+        if (test()) {                                    \
+            cout << "[OK]\n" << endl;         \
+        } else {                         \
+            cout << "[Failed]\n\n <span>To see what the test does and why it failed, please check the link at the top of the page to the test file</span>" << endl;       \
+        }                                \
+    } while (0);
+
+
+
+#define ASSERT(expr, backUpbuf ) ASSERT_TEST(expr, backUpbuf)
+
+
+#define REDIRECT_OUTPUT(fileName, PATH)\
+std::string fileName = PATH;\
+std::ofstream out(fileName, std::ios_base::trunc);\
+std::streambuf* stream_buffer_cout = cout.rdbuf();\
+std::cout.rdbuf(out.rdbuf());
+
+
+
+bool matchFiles(const std::string& out, const std::string& exp) {
+    ifstream output(out);
+    if (!output) {
+        cout << "can't open file" << endl;
+    }
+    ifstream expOutput(exp);
+    if (!expOutput) {
+        cout << "can't open file" << endl;
+    }
+    while (!output.eof()) {
+        char c;
+        output >> c;
+        char ex;
+        expOutput >> ex;
+        if (ex != c) {
+            return false;
+        }
+    }
+    return true;
+}
+
+struct Filter2 {
+    bool operator()(int student) {
+        return student >= 2 && student <= 8;
+    }
+};
+
+BaseEvent* generate(int i) {
+    switch (i) {
+        case 0:
+            return new OpenEvent(DateWrap(1, 1, 2000), "an open event");
+        case 1:
+            return new ClosedEvent(DateWrap(1, 1, 2000), "a closed event");
+        case 2:
+            return new CustomEvent<Filter2>(DateWrap(1, 1, 2000), "a custom event", Filter2());
+        default:
+            return nullptr;
+    }
+}
+
+
+struct pred{
+    OpenEvent op = OpenEvent(DateWrap(1,1,2000), "an open event");
+    ClosedEvent cp = ClosedEvent(DateWrap(1,1,2000), "a closed event");
+    CustomEvent<Filter2> cup = CustomEvent<Filter2>(DateWrap(1,1,2000), "a custom event", Filter2());
+public:
+    bool operator()(const BaseEvent& b) const{
+        return b == op || cp == b || cup == b;
+    }
+};
+
+void test1(const Schedule &schedule) {
+    schedule.printAllEvents(); }
+
+void test2(const Schedule& schedule) {
     schedule.printEventDetails(mtm::DateWrap(27, 12, 2020), "Publish Test");
 }
 
-void test3(const mtm::Schedule& schedule) {
+void test3(const Schedule &schedule) {
     schedule.printEventDetails(mtm::DateWrap(5, 1, 2021), "Update Q&A");
 }
 
@@ -38,8 +141,10 @@ void test5(const mtm::Schedule& schedule) {
     schedule.printSomeEvents(MutatingPredicate(), true);
 }
 
-void testYan1()
+bool testYan1()
 {
+    bool result = true;
+    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testYan1.txt"))
     mtm::Schedule schedule;
     //notice events should be merged lexicographically
     schedule.addEvents(mtm::OneTimeEvent<mtm::OpenEvent>(
@@ -55,20 +160,15 @@ void testYan1()
     schedule.addEvents(mtm::OneTimeEvent<mtm::OpenEvent>(
         mtm::DateWrap(1, 1, 2020), "YanX"));
     schedule.printAllEvents();
-    cout<< "====test1===="<<endl;
-    /*
-    ===========Excpected Output==============
-    YanA 1/1/2020
-    YanB 1/1/2020
-    YanC 1/1/2020
-    YanR 1/1/2020
-    YanX 1/1/2020
-    YanZ 1/1/2020
-    */
+    out.close();
+    ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testYan1.txt")), stream_buffer_cout)
+    return result;
 }
 
-void testYan2()
+bool testYan2()
 {
+    bool result = true;
+    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testYan2.txt"))
     mtm::Schedule schedule;
     //notice events should be merged by date
     schedule.addEvents(mtm::OneTimeEvent<mtm::OpenEvent>(
@@ -86,10 +186,10 @@ void testYan2()
     schedule.addEvents(mtm::OneTimeEvent<mtm::OpenEvent>(
         mtm::DateWrap(30, 1, 2020), "YanM"));
     schedule.addEvents(mtm::OneTimeEvent<mtm::OpenEvent>(
-        mtm::DateWrap(1, 1, -20), "YanX"));
+        mtm::DateWrap(1, 1, 2020), "YanX"));
     try{
         schedule.addEvents(mtm::OneTimeEvent<mtm::OpenEvent>(
-         mtm::DateWrap(1, 1, -20), "YanX"));
+         mtm::DateWrap(1, 1, 2020), "YanX"));
     }catch(mtm::EventAlreadyExists&){ 
     }
      try{
@@ -98,18 +198,9 @@ void testYan2()
     }catch(mtm::EventAlreadyExists&){ 
     }
     schedule.printAllEvents();
-    cout<< "====test2===="<<endl;
-    /*
-    ===========Excpected Output==============
-    YanX 1/1/-20
-    YanZ 1/1/2020
-    YanM 30/1/2020
-    YanR 30/1/2020
-    YanB 1/2/2020
-    YanC 1/2/2020
-    YanA 2/2/2020
-    YanZ 20/1/2022
-    */
+     out.close();
+    ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testYan2.txt")),stream_buffer_cout)
+    return result;
 }
 
 class StudentOddFilter {
@@ -134,8 +225,10 @@ class Predicate {
 };
 
 
-void testYan3()
+bool testYan3()
 {
+    bool result = true;
+    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testYan3.txt"))
     mtm::Festival festival(mtm::DateWrap(21, 10, 2020));
 
     mtm::OpenEvent open(mtm::DateWrap(21, 10, 2020), "YanA");
@@ -171,57 +264,15 @@ void testYan3()
     schedule.addEvents(festival);
     schedule.registerToEvent(mtm::DateWrap(21, 10, 2020),"YanB",198);
     schedule.printSomeEvents(Predicate(), true);
-    cout<< "====test3===="<<endl;
-    /*
-    students should be merged!
-    new line between events!
-    ===========Excpected Output==============
-    YanB 21/10/2020
-    2
-    4
-    6
-    8
-    10
-    12
-    14
-    16
-    18
-    20
-    22
-    24
-    26
-    28
-    30
-    32
-    34
-    36
-    38
-    198
-
-    YanC 21/10/2020
-    1
-    2
-    3
-    4
-    5
-    6
-    7
-    8
-    9
-    10
-    11
-    12
-    13
-    14
-    15
-    16
-    17
-    18
-    */
+    out.close();
+    ASSERT_TEST(matchFiles(fileName, FILE_PATH + std::string("/expected/testYan3.txt")), stream_buffer_cout)
+    return result;
 }
 
-void testYan4()
+bool testYan4()
 {
+    bool result = true;
+    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testYan4.txt"))
     mtm::Schedule schedule;
     schedule.addEvents(mtm::OneTimeEvent<mtm::OpenEvent>(
         mtm::DateWrap(1, 12, 2020), "YanZ"));
@@ -254,44 +305,22 @@ void testYan4()
     schedule.printEventDetails(mtm::DateWrap(14, 12, 2020), "YanE");
     schedule.printEventDetails(mtm::DateWrap(1, 12, 2020), "YanZ");
     schedule.printEventDetails(mtm::DateWrap(25, 12, 2020), "YanR");
-    cout<< "====test4===="<<endl;
-    /*
-    new line between events!
-    ===========Excpected Output==============
-    YanE 14/12/2020
-    5
-    6
-    7
-    8
-    9
-
-    YanZ 1/12/2020
-    20
-    21
-    22
-    23
-    24
-    60
-    61
-    62
-    63
-    64
-
-    YanR 25/12/2020
-    */
+    out.close();
+    ASSERT_TEST(matchFiles(fileName, FILE_PATH + std::string("/expected/testYan4.txt")),stream_buffer_cout)
+    return result;
 }
-typedef void (*Test)(const mtm::Schedule&);
-const Test tests[] = {test1, test2, test3, test4, test5, testYan1, testyan2, testYan3, testYan4};
 
-int main(int argc, char* argv[]) {
+bool allSegelTests(){
+    bool result = true;
+    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/allSegelTests.txt"))
     mtm::Schedule schedule;
     schedule.addEvents(mtm::OneTimeEvent<mtm::OpenEvent>(
             mtm::DateWrap(27, 12, 2020), "Publish Test"));
 
     mtm::RecurringEvent<mtm::ClosedEvent> closed(mtm::DateWrap(20, 12, 2020),
                                                  "Update Q&A", 6, 5);
-    for (mtm::BaseEvent& event : closed) {
-        mtm::ClosedEvent& closed_event = dynamic_cast<mtm::ClosedEvent&>(event);
+    for (mtm::BaseEvent &event : closed) {
+        mtm::ClosedEvent &closed_event = dynamic_cast<mtm::ClosedEvent &>(event);
         closed_event.addInvitee(1337);
         closed_event.addInvitee(850);
         closed_event.addInvitee(1500);
@@ -304,22 +333,124 @@ int main(int argc, char* argv[]) {
     schedule.registerToEvent(mtm::DateWrap(5, 1, 2021), "Update Q&A", 1500);
     schedule.unregisterFromEvent(mtm::DateWrap(20, 12, 2020), "Update Q&A",
                                  1500);
+    test1(schedule);
+    test2(schedule);
+    test3(schedule);
+    test4(schedule);
+    test5(schedule);
+    out.close();
+    ASSERT_TEST(matchFiles(fileName, FILE_PATH + std::string("/expected/allSegelTests.txt")), stream_buffer_cout)
+    return result;
+}
+bool testConstructor() {
+    bool result = true;
+    Schedule s;
+    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testConstructor.txt"))
+    s.printAllEvents();
+    out.close();
+    ASSERT_TEST(matchFiles(fileName, FILE_PATH + std::string("/expected/testConstructor.txt")), stream_buffer_cout)
+    return result;
+}
+bool testSchedulePolymorphism() {
+    bool result = true;
+    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testSchedulePolymorphism.txt"))
+    Schedule s;
+    Festival f(DateWrap(1, 1, 2000));
+    for (int i = 0; i < 3; i++) {
+        if (i == 1) {
+            ClosedEvent *cl = dynamic_cast<ClosedEvent *>(generate(i));
+            for (int j = 1; j < 10; j++) {
+                cl->addInvitee(j);
+            }
+            f.add(*cl);
+            delete cl;
+        } else {
+            BaseEvent *b = generate(i);
+            f.add(*b);
+            delete b;
+        }
+    }
+    s.addEvents(f);
+    for (int i = 1; i < 10 ; i++){
+        s.registerToEvent(DateWrap(1,1,2000), "an open event", i);
+        s.registerToEvent(DateWrap(1,1,2000), "a closed event", i);
+        try{
+            s.registerToEvent(DateWrap(1,1,2000), "a custom event", i);
+        }catch(mtm::RegistrationBlocked&){
+            cout << "RegistrationBlocked" << endl;
+        }
+    }
+    RecurringEvent<OpenEvent> recurringEvent(DateWrap(1,1,2000), "an open event", 3, 2);
+    try{
+        s.addEvents(recurringEvent);
+    }catch(mtm::EventAlreadyExists&){
+        cout << "EventAlreadyExists" << endl;
+    }
+    RecurringEvent<ClosedEvent> recurringEvent1(DateWrap(1,1,2000), "an open event", 1,1);
+    try{
+        s.addEvents(recurringEvent1);
+    }catch(mtm::EventAlreadyExists&){
+        cout << "EventAlreadyExists" << endl;
+    }
+    RecurringEvent<OpenEvent> recurringEvent2(DateWrap(2,1,2000), "an open event", 2,2);
+    s.addEvents(recurringEvent2);
+    s.registerToEvent(DateWrap(2,1,2000), "an open event", 2);
+    s.printSomeEvents(pred(), true);
+    out.close();
+    ASSERT_TEST(matchFiles(fileName, FILE_PATH + std::string("/expected/testSchedulePolymorphism.txt")), stream_buffer_cout)
+    return result;
+}
+
+/*bool testRegistrationAndUnRegistration(){
+    bool result = true;
+    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testRegistrationAndUnRegistration.txt"))
+    Schedule s;
+    RecurringEvent<OpenEvent> recurringEvent(DateWrap(2,1,2000), "an open event", 5,3);
+    s.addEvents(recurringEvent);
+
+    return result;
+}*/
+
+
+#define TEST_NAMES\
+    X(allSegelTests)\
+    X(testYan1)\
+    X(testYan2)\
+    X(testYan3)\
+    X(testYan4)   \
+    X(testConstructor) \
+    X(testSchedulePolymorphism)
+
+
+static const int NUMBER_OF_TESTS = 7;
+
+
+const char* testNames[] = {
+#define X(name) #name,
+        TEST_NAMES
+#undef X
+};
+
+
+bool (*tests[])(void) = {
+#define X(test_name) test_name,
+        TEST_NAMES
+#undef X
+};
+
+
+int main(int argc, char* argv[]) {
 
     if (argc < 2) {
-        test1(schedule);
-        test2(schedule);
-        test3(schedule);
-        test4(schedule);
-        test5(schedule);
-        testYan1();
-        testYan2();
-        testYan3();
-        testYan4();
+        for (int i = 0; i < NUMBER_OF_TESTS; i++) {
+            RUN_TEST(tests[i], testNames[i])
+        }
     } else if (argc > 2) {
         std::cout << "invalid arguments" << std::endl;
     } else {
         int i = std::atoi(argv[1]);
-        tests[i - 1](schedule);
+        tests[i - 1]();
     }
     return 0;
+
 }
