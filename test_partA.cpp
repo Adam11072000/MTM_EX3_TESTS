@@ -49,9 +49,9 @@ bool matchFiles(std::string out, std::string  exp) {
     }
     while (!output.eof()) {
         char c;
-        output >> c;
+        output >> std::noskipws >>c;
         char ex;
-        expOutput >> ex;
+        expOutput >> std::noskipws >> ex;
         if (ex != c) {
             return false;
         }
@@ -285,7 +285,8 @@ bool testDatePrint_CreatorYan() {
     bool result = true;
     OPEN_FILE(out, FILE_PATH + std::string("/your_outputs/testDatePrint_CreatorYan.txt"))
     DateWrap date(4, 11, 2011);
-    out << date;
+    //out << date;
+    print(date, out);
     out.close();
     ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testDatePrint_CreatorYan.txt")))
     return result;
