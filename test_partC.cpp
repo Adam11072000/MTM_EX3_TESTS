@@ -342,15 +342,7 @@ bool allSegelTests(){
     ASSERT_TEST(matchFiles(fileName, FILE_PATH + std::string("/expected/allSegelTests.txt")), stream_buffer_cout)
     return result;
 }
-bool testConstructor() {
-    bool result = true;
-    Schedule s;
-    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testConstructor.txt"))
-    s.printAllEvents();
-    out.close();
-    ASSERT_TEST(matchFiles(fileName, FILE_PATH + std::string("/expected/testConstructor.txt")), stream_buffer_cout)
-    return result;
-}
+
 bool testSchedulePolymorphism() {
     bool result = true;
     REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testSchedulePolymorphism.txt"))
@@ -418,11 +410,10 @@ bool testSchedulePolymorphism() {
     X(testYan2)\
     X(testYan3)\
     X(testYan4)   \
-    X(testConstructor) \
     X(testSchedulePolymorphism)
 
 
-static const int NUMBER_OF_TESTS = 7;
+static const int NUMBER_OF_TESTS = 6;
 
 
 const char* testNames[] = {
