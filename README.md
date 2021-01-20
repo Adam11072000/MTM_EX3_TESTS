@@ -12,7 +12,7 @@ in the main directory (doesn't really matter what name), there should be 4 direc
 
 2) partB: which consists of all the files you used to implement the said part.
 
-3) partC: as said in part2 directory.
+3) partC: as said in partB directory.
 
 4) provided: which has the following files:
 
@@ -29,7 +29,7 @@ the test files i provided are named exactly as the test files of the segel, so b
 IMPORTANT!!!
 
 
-you need to configure the path in each test depending on where your cmake_build_debug directory is. (the path is tests are when the said directory is in part2)
+you need to configure the path in each test depending on where your cmake_build_debug directory is. (the path is tests are when the said directory is in partB)
 
 example:
   if the said directory is in the main directory, you're going to need to change the path in each MACRO ( ASSERT and OPEN_FILE) depending on the path (or change the FILE_PATH).
@@ -37,6 +37,9 @@ example:
   to run the test on the SSH (sharat) of the faculty, the file path in each macro should start without the ../../provided, instead it should start with ./provided.
  you can change the path as you like but be sure to put the expected outputs in a correct directory depending on the path given.
   
+  
+ tests for partC redirect your output to a file to make it easier for me to diff between the output and expected. you don't need to change anything in your code!
+ 
  Always check regulary for added tests :)
  
  
