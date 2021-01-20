@@ -74,9 +74,9 @@ bool matchFiles(const std::string& out, const std::string& exp) {
     }
     while (!output.eof()) {
         char c;
-        output >> c;
+        output >> std::noskipws >> c;
         char ex;
-        expOutput >> ex;
+        expOutput >> std::noskipws >> ex;
         if (ex != c) {
             return false;
         }
