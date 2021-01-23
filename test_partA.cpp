@@ -2,6 +2,7 @@
 #include "../partA/exceptions.h"
 #include <iostream>
 #include <fstream>
+#include <cstdio>
 
 
 using mtm::DateWrap;
@@ -16,7 +17,7 @@ const std::string FILE_PATH = "../../provided/testOutputs/partA";
 #define ASSERT_TEST(expr)                                                         \
      do {                                                                          \
          if (!(expr)) {                                                            \
-             cout << "\nAssertion failed at"<< __FILE__<< __LINE__ << #expr << endl; \
+             printf("\nAssertion failed at %s:%d %s ", __FILE__, __LINE__, #expr); \
              result = false;                                                       \
          }                                                                         \
      } while (0);
@@ -31,14 +32,14 @@ const std::string FILE_PATH = "../../provided/testOutputs/partA";
         }                                \
     } while (0);
 
-class FileFailed {
+class FileFailed: std::exception{
 public:
     FileFailed() = default;
-    ~FileFailed() = default;
+    ~FileFailed() override = default;
 };
 
 
-bool matchFiles(std::string out, std::string  exp) {
+bool matchFiles(const std::string& out, const std::string&  exp) {
     ifstream output(out);
     if (!output) {
         cout << "can't open file" << endl;
