@@ -481,8 +481,6 @@ bool testFestivalAddAndIterator() {
     Iter iter2(festival.begin());
     iter = iter2;
     ASSERT(iter == iter2)
-    //Iter iter3(festival1.begin());
-    //ASSERT(iter != iter3);
     Iter iter4(iter2);
     ASSERT(iter2 == iter4);
     ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testFestivalAddAndIterator.txt")))
@@ -519,7 +517,6 @@ bool testFestivalPolymorphism() {
     catch (mtm::RegistrationBlocked&) {
         out << "RegistrationBlocked" << endl;
     }
-    Festival f(festival);
     printEventsLong(festival, out);
     out.close();
     ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testFestivalPolymorphism.txt")))
