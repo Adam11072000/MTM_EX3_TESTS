@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <cstdio>
 
 
 using mtm::Schedule;
@@ -27,14 +28,13 @@ using mtm::BaseEvent;
 using mtm::OpenEvent;
 using mtm::ClosedEvent;
 using mtm::CustomEvent;
-
 static const std::string FILE_PATH = "../../provided/testOutputs/partC";
 
 #define ASSERT_TEST(expr, backUpbuf)                                                         \
      do {                                                                                    \
      cout.rdbuf(backUpbuf);\
          if (!(expr)) {                                                                       \
-             cout << "\nAssertion failed at line"<< __LINE__ << "  " << __FILE__ << #expr << endl; \
+             printf("\nAssertion failed at %s:%d %s ", __FILE__, __LINE__, #expr);\
              result = false;                                                       \
          }                                                                         \
      } while (0);
@@ -61,7 +61,19 @@ std::ofstream out(fileName, std::ios_base::trunc);\
 std::streambuf* stream_buffer_cout = cout.rdbuf();\
 std::cout.rdbuf(out.rdbuf());
 
+typedef mtm::EventContainer::EventIterator Iter;
 
+bool funcTrue(BaseEvent& b){
+    return true;
+}
+class InheritSchedule:public Schedule{
+public:
+    InheritSchedule() = default;
+    ~InheritSchedule() = default;
+    void printAllEventsLong(){
+        printSomeEvents(funcTrue, true);
+    }
+};
 
 bool matchFiles(const std::string& out, const std::string& exp) {
     ifstream output(out);
@@ -90,6 +102,14 @@ struct Filter2 {
     }
 };
 
+class CustomEventWrap :public CustomEvent<Filter2> {
+public:
+    CustomEventWrap(const DateWrap& date, const std::string& name)
+            :CustomEvent<Filter2>(date, name, Filter2()) {}
+    ~CustomEventWrap() override = default;
+};
+
+
 BaseEvent* generate(int i) {
     switch (i) {
         case 0:
@@ -103,16 +123,6 @@ BaseEvent* generate(int i) {
     }
 }
 
-
-struct pred{
-    OpenEvent op = OpenEvent(DateWrap(1,1,2000), "an open event");
-    ClosedEvent cp = ClosedEvent(DateWrap(1,1,2000), "a closed event");
-    CustomEvent<Filter2> cup = CustomEvent<Filter2>(DateWrap(1,1,2000), "a custom event", Filter2());
-public:
-    bool operator()(const BaseEvent& b) const{
-        return b == op || cp == b || cup == b;
-    }
-};
 
 void test1(const Schedule &schedule) {
     schedule.printAllEvents(); }
@@ -137,7 +147,8 @@ public:
     }
 };
 
-void test5(const mtm::Schedule& schedule) {
+void test5(const mtm::Schedule& schedule)
+{
     schedule.printSomeEvents(MutatingPredicate(), true);
 }
 
@@ -387,21 +398,94 @@ bool testSchedulePolymorphism() {
     RecurringEvent<OpenEvent> recurringEvent2(DateWrap(2,1,2000), "an open event", 2,2);
     s.addEvents(recurringEvent2);
     s.registerToEvent(DateWrap(2,1,2000), "an open event", 2);
-    s.printSomeEvents(pred(), true);
+    s.printMonthEvents(1,2000);
     out.close();
     ASSERT_TEST(matchFiles(fileName, FILE_PATH + std::string("/expected/testSchedulePolymorphism.txt")), stream_buffer_cout)
     return result;
 }
-
-/*bool testRegistrationAndUnRegistration(){
+bool testRegistrationAndUnRegistration(){
     bool result = true;
     REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testRegistrationAndUnRegistration.txt"))
     Schedule s;
     RecurringEvent<OpenEvent> recurringEvent(DateWrap(2,1,2000), "an open event", 5,3);
     s.addEvents(recurringEvent);
-
+    try{
+        s.registerToEvent(DateWrap(2,1,2000), "an open event", 0);
+    }catch(mtm::InvalidStudent&){
+        cout << "InvalidStudent" << endl;
+    }
+    try{
+        s.registerToEvent(DateWrap(3,1,2000), "an open event", 1);
+    }catch(mtm::EventDoesNotExist&){
+        cout << "EventDoesNotExist" << endl;
+    }
+    try{
+        s.registerToEvent(DateWrap(3,1,2000), "an open event", 0);
+    }catch(mtm::InvalidStudent&){
+        cout << "InvalidStudent" << endl;
+    }
+    s.registerToEvent(DateWrap(2,1,2000), "an open event", 1);
+    s.registerToEvent(DateWrap(2,1,2000), "an open event", 2);
+    s.registerToEvent(DateWrap(2,1,2000), "an open event", 3);
+    try{
+        s.unregisterFromEvent(DateWrap(2,1,2000), "an open event", 1);
+        s.unregisterFromEvent(DateWrap(3,1,2000), "an open event", 1);
+    }catch(mtm::EventDoesNotExist&){
+        cout << "EventDoesNotExist" << endl;
+    }
+    InheritSchedule s1;
+    try{
+        s1.registerToEvent(DateWrap(1,1,2000), "an open event", 1);
+    }catch(mtm::EventDoesNotExist&){
+        cout << "EventDoesNotExist" << endl;
+    }
+    try{
+        s1.registerToEvent(DateWrap(1,1,2000), "an open event", 0);
+    }catch(mtm::InvalidStudent&){
+        cout << "InvalidStudent" << endl;
+    }
+    s1.addEvents(recurringEvent);
+    s1.printAllEvents();
+    out.close();
+    ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testRegistrationAndUnRegistration.txt")), stream_buffer_cout)
     return result;
-}*/
+}
+bool testPrintVariations(){
+    bool result = true;
+    REDIRECT_OUTPUT(fileName, FILE_PATH + std::string("/your_outputs/testPrintVariations.txt"))
+    Schedule s;
+    Festival f(DateWrap(1,1,2000));
+    s.addEvents(f);
+    OneTimeEvent<ClosedEvent> e(DateWrap(2,1,2000), "a closed event");
+    Iter iter(e.begin());
+    auto clPtr = dynamic_cast<ClosedEvent*>(&(*(iter)));
+    clPtr->addInvitee(1);
+    clPtr->addInvitee(2);
+    clPtr->addInvitee(3);
+    f.add(OpenEvent(DateWrap(1,1,2000), "an open event"));
+    f.add(OpenEvent(DateWrap(1,1,2000), "an open event2"));
+    f.add(OpenEvent(DateWrap(1,1,2000), "an open event3"));
+    f.add(CustomEventWrap(DateWrap(1,1,2000), "a custom event"));
+    s.addEvents(f);
+    s.addEvents(e);
+    for(int i = 1; i<=3 ; i++) {
+        s.registerToEvent(DateWrap(1, 1, 2000), "an open event", i);
+        s.registerToEvent(DateWrap(1, 1, 2000), "an open event2", i);
+        s.registerToEvent(DateWrap(1, 1, 2000), "an open event3", i);
+        s.registerToEvent(DateWrap(2, 1, 2000), "a closed event", i);
+    }
+    s.printEventDetails(DateWrap(1,1,2000), "an open event");
+    try{
+        s.printEventDetails(DateWrap(2,1,2000), "an open event");
+    }catch(mtm::EventDoesNotExist&){
+        cout << "EventDoesNotExist" << endl;
+    }
+    s.printSomeEvents(funcTrue);
+    s.printMonthEvents(1, 2000);
+    out.close();
+    ASSERT(matchFiles(fileName, FILE_PATH + std::string("/expected/testPrintVariations.txt")), stream_buffer_cout)
+    return result;
+}
 
 
 #define TEST_NAMES\
@@ -410,10 +494,12 @@ bool testSchedulePolymorphism() {
     X(testYan2)\
     X(testYan3)\
     X(testYan4)   \
-    X(testSchedulePolymorphism)
+    X(testSchedulePolymorphism) \
+    X(testRegistrationAndUnRegistration) \
+    X(testPrintVariations)
 
 
-static const int NUMBER_OF_TESTS = 6;
+    static const int NUMBER_OF_TESTS = 8;
 
 
 const char* testNames[] = {
