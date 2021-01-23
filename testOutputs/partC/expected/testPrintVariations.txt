@@ -1,0 +1,27 @@
+an open event 1/1/2000
+1
+2
+3
+
+EventDoesNotExist
+a custom event 1/1/2000
+
+an open event 1/1/2000
+
+an open event2 1/1/2000
+
+an open event3 1/1/2000
+
+a closed event 2/1/2000
+
+a custom event 1/1/2000
+
+an open event 1/1/2000
+
+an open event2 1/1/2000
+
+an open event3 1/1/2000
+
+a closed event 2/1/2000
+
+
