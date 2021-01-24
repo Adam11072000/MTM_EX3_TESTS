@@ -1,4 +1,4 @@
-InvalidStudent
+an exception has occurred
 EventDoesNotExist
 InvalidStudent
 EventDoesNotExist
