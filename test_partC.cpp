@@ -411,8 +411,8 @@ bool testRegistrationAndUnRegistration(){
     s.addEvents(recurringEvent);
     try{
         s.registerToEvent(DateWrap(2,1,2000), "an open event", 0);
-    }catch(mtm::InvalidStudent&){
-        cout << "InvalidStudent" << endl;
+    }catch(mtm::Exception&){
+        cout << "an exception has occurred" << endl;
     }
     try{
         s.registerToEvent(DateWrap(3,1,2000), "an open event", 1);
